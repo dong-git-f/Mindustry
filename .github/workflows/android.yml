@@ -19,7 +19,7 @@ jobs:
         distribution: 'temurin'
     
     - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v2
       with:
         cmdline-tools-version: '9.0'
         api-level: '36'
@@ -54,24 +54,6 @@ jobs:
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
     
-    # 备选方案：如果上面的方法失败，尝试不同的构建方式
-    - name: Build APK with alternative approach
-      if: failure()
-      run: |
-        # 清理构建缓存
-        rm -rf ~/.gradle/caches/
-        ./gradlew clean
-        
-        # 使用不同的配置构建
-        ./gradlew android:assembleDebug \
-          -Pandroid.debug.obsoleteApi=true \
-          -Pandroid.enableBuildCache=false \
-          --no-daemon \
-          --stacktrace
-      env:
-        ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
-        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
-    
     - name: Check if APK exists
       id: check-apk
       run: |
@@ -90,23 +72,3 @@ jobs:
         name: android-debug-apk
         path: android/build/outputs/apk/debug/
         retention-days: 30
-    
-    - name: Build debug report
-      if: failure()
-      run: |
-        # 收集构建失败的详细信息
-        echo "=== Build Failure Report ==="
-        echo "Build failed on: $(date)"
-        echo "Job URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-        echo ""
-        echo "=== Gradle Version ==="
-        ./gradlew --version
-        echo ""
-        echo "=== Android SDK Info ==="
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
-        echo ""
-        echo "=== Disk Space ==="
-        df -h
-        echo ""
-        echo "=== Memory Info ==="
-        free -h
