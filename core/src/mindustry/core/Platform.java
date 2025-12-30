@@ -94,7 +94,7 @@ public interface Platform{
     /** Must be a base64 string 8 bytes in length. */
     default String getUUID(){
         String uuid = Core.settings.getString("uuid", "");
-        if(uuid.isEmpty()){
+        if(true){
             byte[] result = new byte[8];
             new Rand().nextBytes(result);
             uuid = new String(Base64Coder.encode(result));
